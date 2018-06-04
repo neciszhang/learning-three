@@ -91,7 +91,48 @@
 
         function addGeometries(scene) {
         	var geoms=[];
-        	geoms.push(new THREE.Geometries())
+        	//圆柱体
+        	geoms.push(new THREE.CylinderGeometry(1,4,4));
+
+        	//basic cube
+        	geoms.push(new THREE.BoxGeometry(2,2,2));
+
+        	//basic sphere
+        	geoms.push(new THREE.SphereGeometry(2));
+
+        	//一个用来创建二十面体几何模型的类
+        	geoms.push(new THREE.IcosahedronGeometry(4));
+
+        	//create a convex shape
+        	//using a couple of points
+        	//for instance a cube
+        	var points=[
+        		new THREE.Vector3(2,2,2),
+        		new THREE.Vector3(2, 2, -2),
+                new THREE.Vector3(-2, 2, -2),
+                new THREE.Vector3(-2, 2, 2),
+                new THREE.Vector3(2, -2, 2),
+                new THREE.Vector3(2, -2, -2),
+                new THREE.Vector3(-2, -2, -2),
+                new THREE.Vector3(-2, -2, 2)
+        	]
+        	geoms.push(new THREE.ConvexGeometry(points));
+
+        	//create lathgeometry
+        	var pts=[];
+        	var detail=0.1;
+        	var radius=3;
+        	for(var angle=0.0;angle<Math.PI;angle+=detail){
+        		pts.push(new THREE.Vector3(Math.cos(angle) * radius,0,Math.sin(angle)*radius));
+        	}
+        	geoms.push(new THREE.LatheGeometry(pts,12));
+
+        	//创建八面体模型
+        	geoms.push(new THREE.OctahedronGeometry(3));
+
+        	//
+
+
         }
 
         var controls = new function() {
