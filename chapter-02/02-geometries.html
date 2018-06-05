@@ -130,7 +130,16 @@
         	//创建八面体模型
         	geoms.push(new THREE.OctahedronGeometry(3));
 
-        	//
+        	//生成代表一个参数化曲面的几何模型。
+        	geoms.push(new THREE.ParametricGeometry(THREE.ParametricGeometries.mobius3d,20,10));
+
+        	geoms.push(new THREE.TetrahedronGeometry(3));
+
+        	//一个用来创建圆环面几何模型的类
+        	geoms.push(new THREE.TorusGeometry(3,1,10,10));
+
+        	//创建一个由一对互质整数P和Q产生的特性形状 - 环面扭结；如果P和Q不互质，其结果将是一个环面链环。
+        	geoms.push(new THREE.)
 
 
         }
