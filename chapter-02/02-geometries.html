@@ -4,6 +4,9 @@
 <head>
     <title>Example 02.02 - Geometries</title>
     <script type="text/javascript" src="../libs/three.min.js"></script>
+    <script type="text/javascript" src="../libs/ParametricGeometries.js"></script>
+    <script type="text/javascript" src="../libs/ConvexObjectBreaker.js"></script>
+    <script type="text/javascript" src="../libs/SceneUtils.js"></script>
     <script type="text/javascript" src="../libs/stats.min.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
     <style type="text/css">
@@ -20,6 +23,7 @@
     <div id="D3">
     </div>
     <script type="text/javascript">
+
     var camera;
     var scene;
     var renderer;
@@ -90,56 +94,80 @@
         var step = 0;
 
         function addGeometries(scene) {
-        	var geoms=[];
-        	//圆柱体
-        	geoms.push(new THREE.CylinderGeometry(1,4,4));
+            var geoms = [];
+            //圆柱体
+            geoms.push(new THREE.CylinderGeometry(1, 4, 4));
 
-        	//basic cube
-        	geoms.push(new THREE.BoxGeometry(2,2,2));
+            //basic cube
+            geoms.push(new THREE.BoxGeometry(2, 2, 2));
 
-        	//basic sphere
-        	geoms.push(new THREE.SphereGeometry(2));
+            //basic sphere
+            geoms.push(new THREE.SphereGeometry(2));
 
-        	//一个用来创建二十面体几何模型的类
-        	geoms.push(new THREE.IcosahedronGeometry(4));
+            //一个用来创建二十面体几何模型的类
+            geoms.push(new THREE.IcosahedronGeometry(4));
 
-        	//create a convex shape
-        	//using a couple of points
-        	//for instance a cube
-        	var points=[
-        		new THREE.Vector3(2,2,2),
-        		new THREE.Vector3(2, 2, -2),
+            //create a convex shape
+            //using a couple of points
+            //for instance a cube
+            var points = [
+                new THREE.Vector3(2, 2, 2),
+                new THREE.Vector3(2, 2, -2),
                 new THREE.Vector3(-2, 2, -2),
                 new THREE.Vector3(-2, 2, 2),
                 new THREE.Vector3(2, -2, 2),
                 new THREE.Vector3(2, -2, -2),
                 new THREE.Vector3(-2, -2, -2),
                 new THREE.Vector3(-2, -2, 2)
-        	]
-        	geoms.push(new THREE.ConvexGeometry(points));
+            ]
+            // geoms.push(new THREE.ConvexGeometry(points));
+            // geoms.push(new THREE.DecalGeometry( points ));
 
-        	//create lathgeometry
-        	var pts=[];
-        	var detail=0.1;
-        	var radius=3;
-        	for(var angle=0.0;angle<Math.PI;angle+=detail){
-        		pts.push(new THREE.Vector3(Math.cos(angle) * radius,0,Math.sin(angle)*radius));
-        	}
-        	geoms.push(new THREE.LatheGeometry(pts,12));
+            //create lathgeometry
+            var pts = [];
+            var detail = 0.1;
+            var radius = 3;
+            for (var angle = 0.0; angle < Math.PI; angle += detail) {
+                pts.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
+            }
+            geoms.push(new THREE.LatheGeometry(pts, 12));
 
-        	//创建八面体模型
-        	geoms.push(new THREE.OctahedronGeometry(3));
+            //创建八面体模型
+            geoms.push(new THREE.OctahedronGeometry(3));
 
-        	//生成代表一个参数化曲面的几何模型。
-        	geoms.push(new THREE.ParametricGeometry(THREE.ParametricGeometries.mobius3d,20,10));
+            //生成代表一个参数化曲面的几何模型。
+            geoms.push(new THREE.ParametricGeometry(THREE.ParametricGeometries.mobius3d,20,10));
+            // geoms.push(new THREE.ParametricGeometry(THREE.ParametricGeometries.klein, 20, 10));
 
-        	geoms.push(new THREE.TetrahedronGeometry(3));
+            geoms.push(new THREE.TetrahedronGeometry(3));
 
-        	//一个用来创建圆环面几何模型的类
-        	geoms.push(new THREE.TorusGeometry(3,1,10,10));
+            //一个用来创建圆环面几何模型的类
+            geoms.push(new THREE.TorusGeometry(3, 1, 10, 10));
 
-        	//创建一个由一对互质整数P和Q产生的特性形状 - 环面扭结；如果P和Q不互质，其结果将是一个环面链环。
-        	geoms.push(new THREE.)
+            //创建一个由一对互质整数P和Q产生的特性形状 - 环面扭结；如果P和Q不互质，其结果将是一个环面链环。
+            // geoms.push(new THREE.)
+            var j=0;
+            for(var i=0;i<geoms.length;i++){
+                var cubeMaterial=new THREE.MeshLambertMaterial({wireframe:true,color:Math.random()*0xffffff});
+
+                var materials=[
+                    new THREE.MeshBasicMaterial({color:Math.random()*0xffffff,shading: THREE.FlatShading}),
+                    new THREE.MeshBasicMaterial({color:0x000000,wireframe:true})
+                ];
+
+                var mesh= THREE.SceneUtils.createMultiMaterialObject(geoms[i],materials);
+                mesh.traverse(function(e){
+                    e.castShadow=true;
+                });
+
+                mesh.position.x=-10+((i % 4) * 12);
+                mesh.position.y=4;
+                mesh.position.z=-8 + (j * 12);
+
+                if ((i + 1) % 4 == 0) j++;
+                scene.add(mesh);
+
+            }
 
 
         }
@@ -201,20 +229,20 @@
         function render() {
             stats.update();
 
-            scene.traverse(function(e) {
-                if (e instanceof THREE.Mesh && e != plane) {
-                    //rotate the cube around ite axes
-                    e.rotation.x += controls.rotationSpeed;
-                    e.rotation.y += controls.rotationSpeed;
-                    e.rotation.z += controls.rotationSpeed;
-                }
+            // scene.traverse(function(e) {
+            //     if (e instanceof THREE.Mesh && e != plane) {
+            //         //rotate the cube around ite axes
+            //         e.rotation.x += controls.rotationSpeed;
+            //         e.rotation.y += controls.rotationSpeed;
+            //         e.rotation.z += controls.rotationSpeed;
+            //     }
 
-            });
+            // });
 
 
-            step += controls.bouncingSpeed;
-            sphere.position.x = 20 + (10 * (Math.cos(step)));
-            sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+            // step += controls.bouncingSpeed;
+            // sphere.position.x = 20 + (10 * (Math.cos(step)));
+            // sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
 
 
             requestAnimationFrame(render);
