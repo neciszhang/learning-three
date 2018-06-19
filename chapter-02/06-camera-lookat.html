@@ -85,6 +85,10 @@
             }
         }
 
+        var lookAtGeom = new THREE.SphereGeometry(2);
+        var lookAtMesh = new THREE.Mesh(lookAtGeom, new THREE.MeshLambertMaterial({ color: 0xff0000 }));
+        scene.add(lookAtMesh);
+
         var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
         directionalLight.position.set(-20, 40, 60);
         scene.add(directionalLight);
@@ -141,51 +145,20 @@
         gui.add(controls, 'perspective').listen();
         gui.add(controls, 'switchCamera');
 
-        camera.lookAt(scene.position);
+        // camera.lookAt(scene.position);
 
         render();
 
         function render() {
             stats.update();
 
-            cube.visible = true;
+            step += 0.02;
 
-            cube.rotation.x = controls.rotationX;
-            cube.rotation.y = controls.rotationY;
-            cube.rotation.z = controls.rotationZ;
-
-            cube.scale.set(controls.scaleX, controls.scaleY, controls.scaleZ);
-
-
-
-            // scene.traverse(function(e) {
-            //     if (e instanceof THREE.Mesh && e != plane) {
-            //         //rotate the cube around ite axes
-            //         e.rotation.x += controls.rotationSpeed;
-            //         e.rotation.y += controls.rotationSpeed;
-            //         e.rotation.z += controls.rotationSpeed;
-            //     }
-
-            // });
-
-
-            // step += controls.bouncingSpeed;
-            // sphere.position.x = 20 + (10 * (Math.cos(step)));
-            // sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
-            // var vertices = [];
-            // for (var i = 0; i < 8; i++) {
-            //     vertices.push(new THREE.Vector3(controlPoints[i].x, controlPoints[i].y, controlPoints[i].z));
-            // }
-
-            // mesh.children.forEach(function(e) {
-            //     e.geometry.vertices = vertices;
-            //     e.geometry.verticesNeedUpdate = true;
-            //     e.geometry.elementsNeedUpdate = true;
-            //     e.geometry.computeFaceNormals();
-            //     // e.geometry.mergeVertices();
-            //     // e.geometry.computeVertexNormals ();
-            //     // e.geometry.normalsNeedUpdate = true;
-            // });
+            if(camera instanceof THREE.Camera){
+            	var x=10+(100*Math.sin(step));
+            	camera.lookAt(x,10,0);
+            	lookAtMesh.position.copy(new THREE.Vector3(x,10,0));
+            }
 
 
             requestAnimationFrame(render);
