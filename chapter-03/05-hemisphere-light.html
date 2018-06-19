@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Example 03.05 - hemisphere light</title>
+    <script type="text/javascript" src="../libs/three.min.js"></script>
+    <script type="text/javascript" src="../libs/ParametricGeometries.js"></script>
+    <script type="text/javascript" src="../libs/ConvexObjectBreaker.js"></script>
+    <script type="text/javascript" src="../libs/SceneUtils.js"></script>
+    <script type="text/javascript" src="../libs/stats.min.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
+    <style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="STATS">
+    </div>
+    <div id="D3">
+    </div>
+    <script type="text/javascript">
+    var camera;
+    var scene;
+    var renderer;
+
+    function init() {
+
+        var stats = initStats();
+
+        // create a scene, and that we will hold all our elements such as objects,cameras and lights
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0xaaaaaa, 0.010, 200);
+
+        // scene.fog= new THREE.Fog(0xffffff,0.015,100);//使用该属性可以为场景添加雾化效果，可以产生隐藏远处物体的浓雾效果。
+        // scene.overrideMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }); //使用该属性可以强制场景中的所有物体使用相同的材质。
+
+        //create a camera ,which defines where we are looking at
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        //create a render and set the size
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor(new THREE.Color(0xaaaaff, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true; //允许阴影映射，渲染阴影需要大量的资源，因此我们需要告诉渲染器我们需要阴影
+        // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        var planeGeometry, planeMaterial, plane, spotLight0,hemiLight;
+
+        var loader = new THREE.TextureLoader();
+        loader.load('../assets/textures/ground/grasslight-big.jpg', function(texture) {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(4, 4);
+
+                planeGeometry = new THREE.PlaneGeometry(600, 200, 20, 20);
+                planeMaterial = new THREE.MeshLambertMaterial({ map: texture });
+                plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.receiveShadow = true; //平面进行接受阴影
+                plane.rotation.x = -0.5 * Math.PI;
+                plane.position.x = 0;
+                plane.position.y = 0;
+                plane.position.z = 0;
+
+                scene.add(plane);
+
+                spotLight0 = new THREE.SpotLight(0xcccccc);
+                spotLight0.position.set(-40, 60, -10);
+                spotLight0.lookAt(plane);
+                scene.add(spotLight0);
+
+				hemiLight = new THREE.HemisphereLight(0x0000ff, 0x00ff00, 0.6);
+        		hemiLight.position.set(0, 500, 0);
+        		scene.add(hemiLight);
+            },
+            undefined,
+            // 下载出错的回调函数
+            function(xhr) {
+                console.log('An error happened');
+            });
+
+        //show axes in the screen
+        // var axes = new THREE.AxesHelper(10);
+        // scene.add(axes);
+
+
+        //create a cube
+        var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+        var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.castShadow = true;
+
+        cube.position.x = -4;
+        cube.position.y = 3;
+        cube.position.z = 0;
+
+        scene.add(cube);
+
+        //create a sphere
+        var sphereGeometry = new THREE.SphereGeometry(4, 20, 20);
+        var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x7777ff });
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.castShadow = true;
+
+        sphere.position.x = 20;
+        sphere.position.y = 0;
+        sphere.position.z = 2;
+
+        scene.add(sphere);
+
+        camera.position.x = -20;
+        camera.position.y = 15;
+        camera.position.z = 45;
+        camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+        // var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        // directionalLight.position.set(-20, 40, 60);
+        // scene.add(directionalLight);
+
+        // console.log(scene.position);
+        // camera.lookAt(new THREE.Vector3(5, 0, 0));
+
+        //add subtle ambient lighting
+        // var ambiColor = '#1c1c1c';
+        // var ambientLight = new THREE.AmbientLight(ambiColor);
+        // scene.add(ambientLight);
+
+        // add spotlight for a bit of light
+        // var spotLight0 = new THREE.SpotLight(0xcccccc);
+        // spotLight0.position.set(-40, 60, -10);
+        // spotLight0.lookAt(plane);
+        // scene.add(spotLight0);
+
+
+
+        var target = new THREE.Object3D();
+        target.position = new THREE.Vector3(5, 0, 0);
+
+
+        var pointColor = '#ffffff';
+        var directionalLight = new THREE.DirectionalLight(pointColor);
+        directionalLight.position.set(-40, 60, -10);
+        directionalLight.castShadow = true;
+        // directionalLight.target = plane;
+        directionalLight.shadow.camera.near = 2;
+        directionalLight.shadow.camera.far = 200;
+        directionalLight.shadow.camera.left = -50;
+        directionalLight.shadow.camera.right = 50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
+
+        directionalLight.distance = 0;
+        directionalLight.intensity = 0.5;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.mapSize.width = 2048;
+
+        scene.add(directionalLight);
+
+        var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
+
+        var sphereLight = new THREE.SphereGeometry(0.2);
+        var sphereLightMaterial = new THREE.MeshLambertMaterial({ color: 0xac6c25 });
+        var sphereLightMesh = new THREE.Mesh(sphereLight, sphereMaterial);
+        sphereLightMesh.castShadow = true;
+
+        sphereLightMesh.position = new THREE.Vector3(3, 20, 3);
+        scene.add(sphereLightMesh);
+        //add geometry
+        // addGeometries(scene);
+
+        D3.appendChild(renderer.domElement);
+        //render the scene
+        renderer.render(scene, camera);
+
+        //call the render function
+        var step = 0;
+
+
+        var invert = 1;
+        var phase = 0;
+
+        var controls = new function() {
+            this.rotationSpeed = 0.03;
+            this.bouncingSpeed = 0.03;
+            this.hemisphere = true;
+            this.color = 0x00ff00;
+            this.skyColor = 0x0000ff;
+            this.intensity = 0.6;
+        };
+
+
+        var gui = new dat.GUI();
+
+        gui.add(controls, 'hemisphere').onChange(function(e) {
+            if (!e) {
+                hemiLight.intensity = 0;
+            } else {
+                hemiLight.intensity = controls.intensity;
+            }
+        });
+
+
+        gui.addColor(controls, 'color').onChange(function(e) {
+            hemiLight.groundColor = new THREE.Color(e);
+        });
+
+        gui.addColor(controls, 'skyColor').onChange(function(e) {
+            hemiLight.color = new THREE.Color(e);
+        });
+
+        //光的强度
+        gui.add(controls, 'intensity', 0, 5).onChange(function(e) {
+            directionalLight.intensity = e;
+        });
+
+
+
+        render();
+
+        function render() {
+            stats.update();
+
+            cube.rotation.x += controls.rotationSpeed;
+            cube.rotation.y += controls.rotationSpeed;
+            cube.rotation.z += controls.rotationSpeed;
+
+            step += controls.bouncingSpeed;
+            sphere.position.x = 20 + (10 * (Math.cos(step)));
+            sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
+
+
+
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+
+        function initStats() {
+            var stats = new Stats();
+            stats.setMode(0); //0 fps 1 ms
+
+            //align top left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            STATS.appendChild(stats.domElement);
+
+            return stats;
+
+
+        }
+
+    }
+
+    function onResize(argument) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onResize, false);
+
+    window.onload = init;
+    </script>
+</body>
+
+</html>
