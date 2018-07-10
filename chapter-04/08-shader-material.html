@@ -356,7 +356,8 @@
 
         function render() {
             stats.update();
-            cube.rotation.y = step += 0.01;
+            // cube.rotation.y = step += 0.01;
+            cube.rotation.y = step+=0.01;
     		cube.rotation.x = step;
     		cube.rotation.z = step;
 
@@ -381,8 +382,8 @@
     }
 
     function createMaterial(vertexShader,fragmentShader){
-    	var vertShader=document.getElementById(vertexShader);
-    	var fragShader=document.getElementById(fragmentShader);
+    	var vertShader=document.getElementById(vertexShader).innerHTML;
+    	var fragShader=document.getElementById(fragmentShader).innerHTML;
 
     	var attributes={};
     	var uniforms={
@@ -404,14 +405,14 @@
 		    }
     	};
 
-    	uniforms.resolution.value.x=window.innerWidth;
-    	uniforms.resolution.value.y=window.innerHeight;
+    	uniforms.resolution.value.x = window.innerWidth;
+    	uniforms.resolution.value.y = window.innerHeight;
     	var meshMaterial = new THREE.ShaderMaterial({
     		uniforms:uniforms,
     		vertexShader:vertShader,
     		fragmentShader:fragShader,
     		transparent:true
-    	})
+    	});
     	return meshMaterial;
     }
 
